@@ -1,0 +1,24 @@
+{
+  "references": [
+    {
+      "name": "Zaragoza",
+      "file": "Prendimiento - Zaragoza.mp3",
+      "description": "Marcha de todas las cofradias de zaragoza"
+    },
+    {
+      "name": "Bonanza",
+      "file": "Prendimiento - Zaragoza.mp3",
+      "description": "toque de bonanza."
+    },
+    {
+      "name": "Jota",
+      "file": "Prendimiento - Jota.mp3",
+      "description": "Estruendo de jota."
+    },
+    {
+      "name": "La Corona",
+      "file": "Prendimiento - La Corona.mp3",
+      "description": "marcha de la corona."
+    }
+  ]
+}
