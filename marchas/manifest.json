@@ -1,0 +1,29 @@
+{
+  "references": [
+    {
+      "name": "Zarago",
+      "file": "Prendimiento - Zaragoza.mp3",
+      "description": "Marcha de todas las cofradias de zaragoza"
+    },
+    {
+      "name": "Toque de Llamada",
+      "file": "llamada.mp3",
+      "description": "Golpes secos y distanciados indicando el comienzo de la marcha procesional."
+    },
+    {
+      "name": "La Rompida de la Hora",
+      "file": "rompida.mp3",
+      "description": "Estruendo continuo y potente, rompiendo el silencio como es característico en el Bajo Aragón."
+    },
+    {
+      "name": "Marcha Lenta de Costaleros",
+      "file": "marcha_lenta.mp3",
+      "description": "Paso de procesión solemne, marcando un ritmo a tierra guiando la figura."
+    },
+    {
+      "name": "Redoble de Dolor",
+      "file": "redoble.mp3",
+      "description": "Patrón rápido pero sosegado que simboliza aflicción y recogimiento."
+    }
+  ]
+}
