@@ -129,7 +129,8 @@ function extractRhythmicPattern(audioBuffer) {
         maxVals.push(max);
     }
     const avg = maxVals.reduce((a,b) => a+b, 0) / maxVals.length;
-    const dynamicThresh = Math.max(avg * 2.5, 0.05);
+    const maxAbs = Math.max(...maxVals);
+    const dynamicThresh = Math.max(avg + (maxAbs - avg) * 0.4, 0.02);
     const peaks = [];
     for(let i=0; i<maxVals.length; i++) {
         if(maxVals[i] > dynamicThresh) {
@@ -344,11 +345,19 @@ async function stopRecording(performAnalysis = false) {
 
 // --- ALGORITMO DE COMPARACIÓN ---
 function analyzeAndShowResults() {
-    if(state.recordingFeatures.length === 0) return;
+    if(state.recordingFeatures.length === 0) {
+        showToast("Audio inexistente. Asegúrate de tener micrófono habilitado.", "error");
+        resetApp();
+        return;
+    }
 
     const rmsVals = state.recordingFeatures.map(f => f.rms);
     const avgRms = rmsVals.reduce((a,b) => a+b, 0) / rmsVals.length;
-    const dynThresh = Math.max(avgRms * 2.5, 0.02);
+    const maxRms = Math.max(...rmsVals);
+    
+    // Umbral estadísticamente más robusto que un multiplicador ciego
+    let dynThresh = avgRms + (maxRms - avgRms) * 0.3;
+    dynThresh = Math.max(dynThresh, 0.01);
     
     const rawPeaks = [];
     for(let f of state.recordingFeatures) {
@@ -357,7 +366,7 @@ function analyzeAndShowResults() {
     const finalMicPeaks = filterPeaks(rawPeaks);
     
     if(finalMicPeaks.length < 3) {
-        showToast("Falta de claridad. Prueba acercándolo más o en un entorno sin eco.", "error");
+        showToast("Audio insuficiente. Sube el volumen o acerca el micrófono.", "error");
         elements.statusTitle.textContent = "Toque para percibir";
         elements.statusText.textContent = "Inténtalo con el ritmo sonando claro.";
         return;
