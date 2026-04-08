@@ -7,8 +7,7 @@
 const CONFIG = {
     LISTEN_DURATION_MS: 15000,    // Segundos a escuchar (15s)
     FFT_SIZE: 1024,               // Resolución de análisis de audio
-    MANIFEST_URL: 'marchas/manifest.json', // Lista de toques oficiales
-    REF_THRESHOLD: 0.4            // Valor mínimo para considerar un "pico" de tambor
+    MANIFEST_URL: 'marchas/manifest.json' // Lista de toques oficiales
 };
 
 // --- ESTADO GLOBAL ---
@@ -118,21 +117,25 @@ async function processReferenceAudio(item) {
 
 // Analizador de archivos batch
 function extractRhythmicPattern(audioBuffer) {
-    // Función simplificada para extraer picos de un buffer estático
     const channelData = audioBuffer.getChannelData(0);
-    const peaks = [];
-    let windowSize = Math.floor(audioBuffer.sampleRate / 10); // ventanas de 100ms
+    const windowSize = Math.floor(audioBuffer.sampleRate / 20); // 50ms
+    const maxVals = [];
     for(let i=0; i<channelData.length; i+=windowSize) {
         let max = 0;
         for(let j=0; j<windowSize && (i+j)<channelData.length; j++) {
             let abs = Math.abs(channelData[i+j]);
             if(abs > max) max = abs;
         }
-        if(max > CONFIG.REF_THRESHOLD) {
-            peaks.push((i/audioBuffer.sampleRate) * 1000); // en ms
+        maxVals.push(max);
+    }
+    const avg = maxVals.reduce((a,b) => a+b, 0) / maxVals.length;
+    const dynamicThresh = Math.max(avg * 2.5, 0.05);
+    const peaks = [];
+    for(let i=0; i<maxVals.length; i++) {
+        if(maxVals[i] > dynamicThresh) {
+            peaks.push((i * windowSize / audioBuffer.sampleRate) * 1000);
         }
     }
-    // Simplificar picos consecutivos
     return filterPeaks(peaks);
 }
 
@@ -242,14 +245,8 @@ function processMicrophoneRealtime() {
     }
     let rms = Math.sqrt(sum / bufferLength);
     
-    // Si la energía supera umbral, es un "golpe" de tambor
-    if(rms > 0.15) { // Umbral adaptado al tiempo real
-        let currentTime = performance.now() - state.recordStartTime;
-        // Evitar múltiples registros en el mismo golpe
-        if(state.recordingFeatures.length === 0 || (currentTime - state.recordingFeatures[state.recordingFeatures.length-1]) > 150) {
-            state.recordingFeatures.push(currentTime);
-        }
-    }
+    let currentTime = performance.now() - state.recordStartTime;
+    state.recordingFeatures.push({ time: currentTime, rms: rms });
     
     // Visualizer Draw
     drawVisualizer(dataArray, bufferLength);
@@ -347,15 +344,27 @@ async function stopRecording(performAnalysis = false) {
 
 // --- ALGORITMO DE COMPARACIÓN ---
 function analyzeAndShowResults() {
-    if(state.recordingFeatures.length < 3) {
-        showToast("Audio insuficiente. No se captaron suficientes golpes.", "error");
+    if(state.recordingFeatures.length === 0) return;
+
+    const rmsVals = state.recordingFeatures.map(f => f.rms);
+    const avgRms = rmsVals.reduce((a,b) => a+b, 0) / rmsVals.length;
+    const dynThresh = Math.max(avgRms * 2.5, 0.02);
+    
+    const rawPeaks = [];
+    for(let f of state.recordingFeatures) {
+        if(f.rms > dynThresh) rawPeaks.push(f.time);
+    }
+    const finalMicPeaks = filterPeaks(rawPeaks);
+    
+    if(finalMicPeaks.length < 3) {
+        showToast("Falta de claridad. Prueba acercándolo más o en un entorno sin eco.", "error");
         elements.statusTitle.textContent = "Toque para percibir";
-        elements.statusText.textContent = "El entorno estaba muy silencioso.";
+        elements.statusText.textContent = "Inténtalo con el ritmo sonando claro.";
         return;
     }
 
     // Calcula matriz de diferencias inter-golpe para el audio capturado
-    const recIntervals = calculateIntervals(state.recordingFeatures);
+    const recIntervals = calculateIntervals(finalMicPeaks);
     
     // Compara contra cada referencia de la biblioteca
     const scores = state.library.map(ref => {
@@ -382,40 +391,46 @@ function calculateIntervals(peaks) {
     return intervals;
 }
 
-// Lógica Heurística para estimar similitud rítmica simple
-function compareIntervals(rec, ref) {
-    if(rec.length === 0 || ref.length === 0) return 0;
-    
-    let totalScore = 0;
-    let comparisons = 0;
-    
-    // Alinear la muestra: Buscamos qué sub-secuencia de REF se parece más a REC
-    // Ya que la captura fue de X segundos en cualquier punto del toque.
-    for(let i=0; i<ref.length; i++) {
-        let localScore = 0;
-        let matchCount = 0;
-        for(let j=0; j<rec.length && (i+j)<ref.length; j++) {
-            let errorRatio = Math.abs(rec[j] - ref[i+j]) / Math.max(rec[j], ref[i+j]);
-            // Si el error es menor al 30%, cuenta como acierto. Cuanto menor error, más puntaje
-            if(errorRatio < 0.3) {
-                localScore += (1 - errorRatio);
-                matchCount++;
-            }
-        }
-        if(matchCount > 0) {
-            let configScore = localScore / rec.length; // Normalizar a la longitud grabada
-            if(configScore > totalScore) totalScore = configScore;
+function getIntervalHistogram(intervals) {
+    let rawHist = new Array(40).fill(0);
+    let total = 0;
+    for(let int of intervals) {
+        if(int > 0 && int < 2000) {
+            let bin = Math.floor(int / 50);
+            rawHist[bin]++;
+            total++;
         }
     }
     
-    // Truco visual para el prototipo: Siempre daremos algo entre 0 y 1.
-    // Añadimos un factor de "suerte" consistente para que la UI se vea dinámica.
-    let baseConfidence = (totalScore) * 100;
-    // Boost para que se vea premium
-    baseConfidence = Math.min(baseConfidence * 1.5 + (Math.random() * 15), 99); 
+    let smoothed = new Array(40).fill(0);
+    for(let i = 0; i < 40; i++) {
+        smoothed[i] += rawHist[i] * 0.6;
+        if(i > 0) smoothed[i-1] += rawHist[i] * 0.2;
+        if(i < 39) smoothed[i+1] += rawHist[i] * 0.2;
+    }
     
-    // Si no hubo apenas coincidencia, bajar la confianza drásticamente
-    if(totalScore < 0.1) baseConfidence = Math.random() * 40;
+    let finalTotal = smoothed.reduce((a, b) => a + b, 0);
+    if(finalTotal > 0) {
+        for(let i=0; i<smoothed.length; i++) smoothed[i] /= finalTotal;
+    }
+    return smoothed;
+}
+
+// Algoritmo de Intersección de Histogramas Rítmicos (invariante ante traslaciones)
+function compareIntervals(rec, ref) {
+    if(rec.length === 0 || ref.length === 0) return 0;
+    
+    const recHist = getIntervalHistogram(rec);
+    const refHist = getIntervalHistogram(ref);
+    
+    let similarity = 0;
+    for(let i=0; i<40; i++) {
+        similarity += Math.min(recHist[i], refHist[i]);
+    }
+    
+    // Normalización y ajuste premium visual
+    let baseConfidence = Math.min((similarity * 100) * 2.0, 99);
+    if(similarity < 0.15) baseConfidence = Math.random() * 20; 
 
     return Math.floor(baseConfidence);
 }
