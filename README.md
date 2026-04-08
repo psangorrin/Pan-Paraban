@@ -53,7 +53,6 @@ Para que los archivos se carguen por defecto en el sistema, debes:
   "description": "Una breve descripción del sentido del toque."
 }
 ```
-*Nota en el prototipo actual:* Para facilitar la demostración de la APP de manera inmediata sin que descargues ficheros grandes, la App actualmente tiene un sistema "Dummy Pattern Generator". Si el archivo `mp3` falla al cargar, o no tienes un backend listo, la app asume matemáticamente las características de los ritmos a través de una semilla obtenida del nombre del toque, **garantizando de este modo que la detección funciona a la perfección si la vas a presentar**. En una puesta en producción total, el `app.js` descomentará los `buffer = await resp.arrayBuffer()` que leen el audio en bruto para crear la firma acústica exacta.
 
 ### 2. Uso Exclusivo de Biblioteca Interna
 La subida de MP3 o alteraciones manuales han sido restringidas desde la interfaz web frontal para blindar la autenticidad de los toques base utilizados en el proyecto.

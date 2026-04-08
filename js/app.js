@@ -83,15 +83,8 @@ async function loadManifest() {
         if (!response.ok) throw new Error('Manifest no encontrado');
         const data = await response.json();
         
-        // Simular que leemos los MP3 para extraer features.
-        // En un entorno real puro cliente, cargar los MP3 requeriría parsearlos todos aquí.
-        // Simularemos las huellas rítmicas pre-generadas de los oficiales por falta de backend.
-        
         for (const item of data.references) {
-            // Genero firmas simuladas pero consistentes para el prototipo si no se tiene el wav.
-            // Para poder ser totalmente autónomo (ya que los mp3 no existen inicialmente),
-            // inyectaremos un generador procedural si el fetch falla.
-            await processReferenceAudioOrMock(item);
+            await processReferenceAudio(item);
         }
         
         updateLibraryUI();
@@ -102,33 +95,25 @@ async function loadManifest() {
     }
 }
 
-async function processReferenceAudioOrMock(item) {
+async function processReferenceAudio(item) {
     try {
-        // En entorno ideal haríamos:
-        /*
-        const resp = await fetch(`marchas/${item.file}`);
+        if (!state.audioContext) {
+            state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        const fileUrl = 'marchas/' + item.file.split('/').map(encodeURIComponent).join('/');
+        const resp = await fetch(fileUrl);
+        
+        if (!resp.ok) throw new Error(`Audio no encontrado: ${item.file}`);
+        
         const buffer = await resp.arrayBuffer();
-        const audioBuffer = await new window.AudioContext().decodeAudioData(buffer);
+        const audioBuffer = await state.audioContext.decodeAudioData(buffer);
         item.features = extractRhythmicPattern(audioBuffer);
-        */
-        // Como no tenemos el MP3 real, generamos un patrón Dummy coherente asociado al nombre para que FUNCIONE la demo.
-        const hash = item.name.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0);
-        item.features = generateDummyPattern(Math.abs(hash));
+        
         state.library.push(item);
     } catch(e) {
-        console.log("Error procesando audio base", e);
+        console.warn(`Error procesando audio real de ${item.name}:`, e);
     }
-}
-
-function generateDummyPattern(seed) {
-    // Genera un perfil de picos de tiempo basado en una semilla (simulando extraerlo de un MP3)
-    let pattern = [];
-    let current = 0;
-    for(let i=0; i<15; i++) {
-        current += 200 + ((seed * (i+1)) % 400); // distancias entre golpes en ms
-        pattern.push(current);
-    }
-    return pattern;
 }
 
 // Analizador de archivos batch
