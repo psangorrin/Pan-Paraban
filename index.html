@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TamborID | Reconocimiento de Toques de Semana Santa</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Fonts para una tipografía elegante -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Iconos Phosphor -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+    <!-- Efecto ambiental de fondo -->
+    <div class="ambient-light main-light"></div>
+    <div class="ambient-light secondary-light"></div>
+
+    <header>
+        <div class="logo">
+            <i class="ph ph-waveform"></i>
+            <h1>TamborID</h1>
+        </div>
+        <p class="subtitle">Identificador acustico de marchas procesionales</p>
+    </header>
+
+    <main>
+        <!-- Tarjeta Central con Glassmorphism -->
+        <div class="glass-card" id="main-card">
+            
+            <!-- Visualizador del estado -->
+            <div class="status-container">
+                <p id="status-text" class="status-text">Listo para escuchar</p>
+                <p id="status-subtext" class="status-subtext">Pulsa el botón cuando empiece a sonar el tambor</p>
+            </div>
+
+            <!-- Botón Central Protagonista -->
+            <div class="radar-container" id="radar-container">
+                <canvas id="audio-visualizer" width="300" height="300"></canvas>
+                <button id="record-btn" class="record-btn" aria-label="Escuchar toque">
+                    <i class="ph-fill ph-microphone"></i>
+                </button>
+                <!-- Anillos de animación -->
+                <div class="ripple"></div>
+                <div class="ripple" style="animation-delay: 0.5s;"></div>
+                <div class="ripple" style="animation-delay: 1s;"></div>
+            </div>
+
+            <!-- Panel de Resultados (oculto por defecto) -->
+            <div id="results-panel" class="results-panel hidden">
+                <div class="best-match">
+                    <div class="match-circle">
+                        <svg viewBox="0 0 36 36" class="circular-chart gold">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="circle" id="confidence-circle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <text x="18" y="20.35" class="percentage" id="confidence-text">0%</text>
+                        </svg>
+                    </div>
+                    <div class="match-info">
+                        <h2 id="match-name">Toque Desconocido</h2>
+                        <p id="match-desc" class="ceremonial-text">Incertidumbre en la noche</p>
+                    </div>
+                </div>
+
+                <div class="other-matches">
+                    <h3>Otras aproximaciones</h3>
+                    <ul id="matches-list">
+                        <!-- Las coincidencias se insertan aquí vía JS -->
+                    </ul>
+                </div>
+                
+                <button id="reset-btn" class="secondary-btn">
+                    <i class="ph ph-arrow-counter-clockwise"></i> Volver a escuchar
+                </button>
+            </div>
+        </div>
+        
+        <!-- Panel de Administración / Carga manual de audios -->
+        <div class="admin-panel glass-card">
+            <h3><i class="ph ph-books"></i> Biblioteca de Referencias</h3>
+            <div class="lib-status">
+                <span class="indicator" id="lib-indicator"></span>
+                <span id="lib-status-text">Cargando base de datos...</span>
+            </div>
+            
+            <div class="upload-area" id="drop-zone">
+                <i class="ph ph-upload-simple"></i>
+                <p>Arrastra archivos MP3 aquí para añadir referencias al vuelo</p>
+                <input type="file" id="file-input" accept="audio/mpeg, audio/mp3" multiple hidden>
+                <button onclick="document.getElementById('file-input').click()" class="tertiary-btn">Explorar archivos</button>
+            </div>
+            
+            <ul id="reference-list" class="reference-list">
+                <!-- Se listan los audios en memoria -->
+            </ul>
+        </div>
+    </main>
+
+    <footer>
+        <p>Desarrollado para la preservación de los toques tradicionales</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

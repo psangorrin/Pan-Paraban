@@ -1,0 +1,104 @@
+{
+  "references": [
+    {
+      "name": "Zaragoza",
+      "file": "Prendimiento - Zaragoza.mp3",
+      "description": "Marcha de todas las cofradias de zaragoza"
+    },
+    {
+      "name": "Bonanza",
+      "file": "Prendimiento - Bonanza.mp3",
+      "description": "Toque de bonanza."
+    },
+    {
+      "name": "Cincuentenario",
+      "file": "Prendimiento - Cincuentenario.mp3",
+      "description": "Toque de cincuentenario."
+    },
+    {
+      "name": "Cuatrera",
+      "file": "Prendimiento - Cuatrera.mp3",
+      "description": "Toque de cuatrera."
+    },
+    {
+      "name": "Dolor de la Madre de Dios",
+      "file": "Prendimiento - Dolor de la Madre de Dios.mp3",
+      "description": "Toque de la madre de dios."
+    },
+    {
+      "name": "El Coso",
+      "file": "Prendimiento - El coso.mp3",
+      "description": "Toque de el coso."
+    },
+    {
+      "name": "Entrada Pasos",
+      "file": "Prendimiento - Entrada pasos.mp3",
+      "description": "Toque de entrada de pasos."
+    },
+    {
+      "name": "Formación",
+      "file": "Prendimiento - Formación.mp3",
+      "description": "Toque de formación."
+    },
+    {
+      "name": "Gritos",
+      "file": "Prendimiento - Gritos.mp3",
+      "description": "Toque de gritos."
+    },
+    {
+      "name": "Himno (Los enanitos)",
+      "file": "Prendimiento - Himno (Los enanitos).mp3",
+      "description": "Toque de himno."
+    },
+    {
+      "name": "Jota",
+      "file": "Prendimiento - Jota.mp3",
+      "description": "Estruendo de jota."
+    },
+    {
+      "name": "La Corona",
+      "file": "Prendimiento - La corona.mp3",
+      "description": "Marcha de la corona."
+    },
+    {
+      "name": "La Ola",
+      "file": "Prendimiento - La ola.mp3",
+      "description": "Toque de la ola."
+    },
+    {
+      "name": "La Paloma",
+      "file": "Prendimiento - La paloma.mp3",
+      "description": "Toque de la paloma."
+    },
+    {
+      "name": "Lenta que no es lenta",
+      "file": "Prendimiento - Lenta que no es lenta.mp3",
+      "description": "Toque de la lenta."
+    },
+    {
+      "name": "Saltiki o Sirtaki",
+      "file": "Prendimiento - Saltiki o sirtaki.mp3",
+      "description": "Toque de saltiki."
+    },
+    {
+      "name": "San Gines",
+      "file": "Prendimiento - San Gines.mp3",
+      "description": "Toque de san gines."
+    },
+    {
+      "name": "Tres Tenores",
+      "file": "Prendimiento - Tres tenores.mp3",
+      "description": "Toque de tres tenores."
+    },
+    {
+      "name": "Un corazón con siete puñales",
+      "file": "Prendimiento - Un corazón con siete puñales.mp3",
+      "description": "Toque de los puñales."
+    },
+    {
+      "name": "Yenka",
+      "file": "Prendimiento - Yenka.mp3",
+      "description": "Toque de yenka."
+    }
+  ]
+}
